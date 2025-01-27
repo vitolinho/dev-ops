@@ -29,6 +29,10 @@ func Database() {
 		panic("failed to connect database")
 	}
 
-	DB.AutoMigrate(&model.Car{})
+
+	if err := DB.AutoMigrate(&model.Car{}); err != nil {
+		panic(fmt.Sprintf("failed to migrate database: %v", err))
+	}
+	
 	SeedCar()
 }

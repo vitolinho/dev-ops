@@ -34,6 +34,17 @@ Before you dive in, make sure to set up your environment variables by following 
 
 6. **Run the command**: In your terminal, simply execute `make up` or `docker-compose up -d --build` to start up your local environment.
 
+## Linter
+First install the linter with this command
+```bash
+./setup.sh
+```
+
+Run the linter with this command:
+```bash
+golangci-lint run
+```
+
 ## Ressources
 
 Porsche-api comes with a set of 1 common resource:

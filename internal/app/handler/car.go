@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"porsche-api/internal/domain/entity"
 	"porsche-api/internal/domain/model"
 	"porsche-api/internal/infrastructure/database"
@@ -86,9 +87,12 @@ func UpdateCar(c *fiber.Ctx) error {
 	}
 
 	var car model.Car
+
 	if result := database.DB.Find(&car, id); result.Error != nil {
-		c.Status(fiber.StatusNotFound).JSON(result.Error)
-	}
+		if err := c.Status(fiber.StatusNotFound).JSON(result.Error); err != nil {
+			panic(fmt.Sprintf("failed to send JSON response: %v", err))
+		}
+	}	
 
 	if input.Name != "" && input.Name != car.Name {
 		car.Name = input.Name
