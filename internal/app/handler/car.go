@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"porsche-api/internal/domain/entity"
 	"porsche-api/internal/domain/model"
 	"porsche-api/internal/infrastructure/database"
@@ -16,8 +15,12 @@ func AddCar(c* fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	if input.Name == "" || input.Price == 0 {
-		return c.SendStatus(fiber.StatusBadRequest)
+	if input.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON("name is required")
+	}
+
+	if input.Price == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON("price cannot be 0")
 	}
 
 	car := &model.Car{
@@ -29,7 +32,7 @@ func AddCar(c* fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
-	return c.JSON(fiber.Map { "message" : "Car added.", "data": nil })
+	return c.Status(fiber.StatusCreated).JSON("Car added")
 }
 
 func GetCars(c *fiber.Ctx) error {
@@ -45,35 +48,36 @@ func GetCars(c *fiber.Ctx) error {
 			Price: r.Price,
 		}
 	}
-	return c.JSON(fiber.Map{ "message": "Cars found.", "data": response })
+	return c.Status(fiber.StatusOK).JSON(response)
 }
 
 func GetCar(c *fiber.Ctx) error {
 	id := c.Params("id")
-	carID, err := strconv.Atoi(id)
+	_, err := strconv.Atoi(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Id must be an integer.", "data": nil})
+		return c.Status(fiber.StatusBadRequest).JSON("Id must be an integer")
 	}
 
 	var count int64
 	database.DB.Model(&model.Car{}).Count(&count)
 
-	if carID <= 0 || carID > int(count) {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": fmt.Sprintf("Id must be between 1 and %d.", count), "data": nil})
-	}
-
 	var car model.Car
 	if result := database.DB.Find(&car, id); result.Error != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	return c.JSON(fiber.Map{ "message": "Car found.", "data": fiber.Map{ "id": car.Id, "name": car.Name, "price": car.Price } })
+
+	if car.Id == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON("invalid id")
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{ "id": car.Id, "name": car.Name, "price": car.Price })
 }
 
 func UpdateCar(c *fiber.Ctx) error {
 	id := c.Params("id")
 	_, err := strconv.Atoi(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Id must be an integer.", "data": nil})
+		return c.Status(fiber.StatusBadRequest).JSON("Id must be an integer")
 	}
 
 	input := new(model.Car)
@@ -83,7 +87,7 @@ func UpdateCar(c *fiber.Ctx) error {
 
 	var car model.Car
 	if result := database.DB.Find(&car, id); result.Error != nil {
-		c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Car not found", "data": result.Error})
+		c.Status(fiber.StatusNotFound).JSON(result.Error)
 	}
 
 	if input.Name != "" && input.Name != car.Name {
@@ -96,19 +100,19 @@ func UpdateCar(c *fiber.Ctx) error {
 
 	database.DB.Updates(&car)
 
-	return c.JSON(fiber.Map{ "message": "Car updated.", "data": nil })
+	return c.Status(fiber.StatusOK).JSON("Car updated")
 }
 
 func DeleteCar(c *fiber.Ctx) error {
 	id := c.Params("id")
 	_, err := strconv.Atoi(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Id must be an integer.", "data": nil})
+		return c.Status(fiber.StatusBadRequest).JSON("Id must be an integer")
 	}
 
 	var car model.Car
 	if result := database.DB.Delete(&car, id); result.Error != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	return c.JSON(fiber.Map{ "message": "Car deleted.", "data": nil })
+	return c.Status(fiber.StatusOK).JSON("Car deleted")
 }
