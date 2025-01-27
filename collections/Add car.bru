@@ -1,0 +1,18 @@
+meta {
+  name: Add car
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/api/v1/cars
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Porsche GT3RS",
+    "Price": 129000
+  }
+}
