@@ -1,7 +1,5 @@
 # Porsche API
 
-![Tests Status](https://github.com/{votre-username}/{votre-repo}/actions/workflows/go-test.yml/badge.svg)
-
 <img src="https://logodownload.org/wp-content/uploads/2021/02/porsche-logo-0.png"/>
 
 Free fake API, written with <a href="https://go.dev/" target="_blank">Golang</a> for testing and prototyping.
