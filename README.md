@@ -47,7 +47,6 @@ golangci-lint run
 
 ## Tests
 * Fill `.env.test` file
-* 
 * Run these commands:
 ```bash
 make up
