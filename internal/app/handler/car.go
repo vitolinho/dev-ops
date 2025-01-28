@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"fmt"
 	"porsche-api/internal/domain/entity"
 	"porsche-api/internal/domain/model"
 	"porsche-api/internal/infrastructure/database"
-	"strconv"
+	"github.com/google/uuid"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -54,45 +53,46 @@ func GetCars(c *fiber.Ctx) error {
 
 func GetCar(c *fiber.Ctx) error {
 	id := c.Params("id")
-	_, err := strconv.Atoi(id)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON("Id must be an integer")
-	}
 
-	var count int64
-	database.DB.Model(&model.Car{}).Count(&count)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON("Invalid UUID format")
+	}
 
 	var car model.Car
-	if result := database.DB.Find(&car, id); result.Error != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+	if result := database.DB.Where("id = ?", parsedID).First(&car); result.Error != nil {
+		if result.RowsAffected == 0 {
+			return c.Status(fiber.StatusNotFound).JSON("Car not found")
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON("Failed to retrieve car")
 	}
 
-	if car.Id == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON("invalid id")
-	}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{ "id": car.Id, "name": car.Name, "price": car.Price })
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"id":    car.Id,
+		"name":  car.Name,
+		"price": car.Price,
+	})
 }
 
 func UpdateCar(c *fiber.Ctx) error {
 	id := c.Params("id")
-	_, err := strconv.Atoi(id)
+	parsedID, err := uuid.Parse(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON("Id must be an integer")
+		return c.Status(fiber.StatusBadRequest).JSON("Invalid UUID format")
 	}
 
 	input := new(model.Car)
 	if err := c.BodyParser(input); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.Status(fiber.StatusBadRequest).JSON("Invalid request body")
 	}
 
 	var car model.Car
-
-	if result := database.DB.Find(&car, id); result.Error != nil {
-		if err := c.Status(fiber.StatusNotFound).JSON(result.Error); err != nil {
-			panic(fmt.Sprintf("failed to send JSON response: %v", err))
+	if result := database.DB.Where("id = ?", parsedID).First(&car); result.Error != nil {
+		if result.RowsAffected == 0 {
+			return c.Status(fiber.StatusNotFound).JSON("Car not found")
 		}
-	}	
+		return c.Status(fiber.StatusInternalServerError).JSON("Failed to fetch car")
+	}
 
 	if input.Name != "" && input.Name != car.Name {
 		car.Name = input.Name
@@ -102,21 +102,31 @@ func UpdateCar(c *fiber.Ctx) error {
 		car.Price = input.Price
 	}
 
-	database.DB.Updates(&car)
+	if result := database.DB.Save(&car); result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON("Failed to update car")
+	}
 
 	return c.Status(fiber.StatusOK).JSON("Car updated")
 }
 
 func DeleteCar(c *fiber.Ctx) error {
 	id := c.Params("id")
-	_, err := strconv.Atoi(id)
+	parsedID, err := uuid.Parse(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON("Id must be an integer")
+		return c.Status(fiber.StatusBadRequest).JSON("Invalid UUID format")
 	}
 
 	var car model.Car
-	if result := database.DB.Delete(&car, id); result.Error != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+	if result := database.DB.Where("id = ?", parsedID).First(&car); result.Error != nil {
+		if result.RowsAffected == 0 {
+			return c.Status(fiber.StatusNotFound).JSON("Car not found")
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON("Failed to fetch car")
 	}
+
+	if result := database.DB.Delete(&car); result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON("Failed to delete car")
+	}
+
 	return c.Status(fiber.StatusOK).JSON("Car deleted")
 }

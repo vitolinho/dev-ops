@@ -29,6 +29,10 @@ func Database() {
 		panic("failed to connect database")
 	}
 
+	if err := DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Error; err != nil {
+		panic(fmt.Sprintf("warning: unable to create extension uuid-ossp: %v", err))
+	}
+
 
 	if err := DB.AutoMigrate(&model.Car{}); err != nil {
 		panic(fmt.Sprintf("failed to migrate database: %v", err))
