@@ -45,6 +45,15 @@ Run the linter with this command:
 golangci-lint run
 ```
 
+## Tests
+* Fill `.env.test` file
+* 
+* Run these commands:
+```bash
+make up
+go test ./... -v
+```
+
 ## Ressources
 
 Porsche-api comes with a set of 1 common resource:
