@@ -100,10 +100,14 @@ jobs:
         with:
           node-version: '18'
 
+       - name: Install pnpm
+        run: |
+          cd client
+          npm install -g pnpm
+
       - name: Install dependencies
         run: |
           cd client
-          npm install pnpm
           pnpm install
 
       - name: Run lint
