@@ -5,7 +5,6 @@ on:
 
 jobs:
   lint:
-    name: Run golangci-lint
     runs-on: ubuntu-latest
 
     steps:
