@@ -1,15 +1,17 @@
-# Porsche API
+# dev-ops
+
+## Porsche API
 
 <img src="https://logodownload.org/wp-content/uploads/2021/02/porsche-logo-0.png"/>
 
 Free fake API, written with <a href="https://go.dev/" target="_blank">Golang</a> for testing and prototyping.
 
-## Why ?
+### Why ?
 Are you tired of spending valuable time registering for complex APIs when all you need is some data for testing or prototyping?
 
 Introducing Porsche API – a lightweight Golang-based API, designed to provide quick and easy access to dummy data without the hassle of registration or complex API documentation.
 
-## Features
+### Features
 * No registration
 * Basic API
 * Cross-domain
@@ -17,12 +19,12 @@ Introducing Porsche API – a lightweight Golang-based API, designed to provide 
 * HTTP
 * Compatible with React, Angular, Vue, Ember, ...
 
-## Set up locally
+### Set up locally
 
 Before you dive in, make sure to set up your environment variables by following these steps:
 
 1. Clone the project: Open your terminal and clone our project repository by running the following command:
-`git clone https://github.com/vitolinho/porsche-api.git`
+`git clone https://github.com/vitolinho/dev-ops.git`
 
 2. **Grab the `.env.example`**: Head over to your project directory and find the `.env.example` file. This serves as a template for your environment variables.
 
@@ -34,7 +36,7 @@ Before you dive in, make sure to set up your environment variables by following 
 
 6. **Run the command**: In your terminal, simply execute `make up` or `docker-compose up -d --build` to start up your local environment.
 
-## Linter
+### Linter
 First install the linter with this command
 ```bash
 ./setup.sh
@@ -42,24 +44,26 @@ First install the linter with this command
 
 Run the linter with this command:
 ```bash
+cd api
 golangci-lint run
 ```
 
-## Tests
+### Tests
 * Fill `.env.test` file
 * Run these commands:
 ```bash
+cd api
 make up
 go test ./... -v
 ```
 
-## Ressources
+### Ressources
 
 Porsche-api comes with a set of 1 common resource:
 
 `/cars` 50 cars
 
-## Routes
+### Routes
 
 **GET, POST, PUT, DELETE** HTTP methods are supported. You can use http for your requests.<br>
 
@@ -73,8 +77,14 @@ Porsche-api comes with a set of 1 common resource:
 
 *DELETE* `/api/v1/cars/1`<br>
 
-## Technical stack
+## Client
 
-[Golang](https://go.dev/) Programing Language<br>
-[Fiber](https://docs.gofiber.io/) Web Framework<br>
-[GORM](https://gorm.io/) ORM library
+### Set up locally
+Install dependencies & run development server
+```
+cd client
+pnpm install
+pnpm dev
+```
+
+To access client development server go to http://localhost:3000
