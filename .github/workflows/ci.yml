@@ -5,6 +5,7 @@ on:
 
 jobs:
   lint:
+    name: Run golangci-lint
     runs-on: ubuntu-latest
 
     steps:
@@ -17,10 +18,13 @@ jobs:
           go-version: "1.x"
 
       - name: Install golangci-lint
-        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.4
+        run: |
+          cd api
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.4
 
       - name: Run golangci-lint
         run: |
+          cd api
           ~/go/bin/golangci-lint run
 
   test:
@@ -51,10 +55,13 @@ jobs:
         go-version: '1.21'
 
     - name: Install dependencies
-      run: go mod download
+      run: |
+        cd api
+        go mod download
 
     - name: Create .env.test file
       run: |
+        cd api
         cat > .env.test << EOF
         DB_HOST=localhost
         DB_USER=postgres
@@ -65,10 +72,13 @@ jobs:
         EOF
 
     - name: Run tests
-      run: go test ./... -v -cover
+      run: |
+        cd api
+        go test ./... -v -cover
 
     - name: Generate test coverage report
       run: |
+        cd api
         go test ./... -coverprofile=coverage.out
         go tool cover -html=coverage.out -o coverage.html
 
@@ -77,3 +87,31 @@ jobs:
       with:
         name: coverage-report
         path: coverage.html 
+
+  client-lint:
+    name: Run eslint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        run: |
+          cd client
+          npm install -g pnpm
+
+      - name: Install dependencies
+        run: |
+          cd client
+          pnpm install
+
+      - name: Run lint
+        run: |
+          cd client
+          pnpm lint
