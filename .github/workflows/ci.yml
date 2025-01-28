@@ -5,6 +5,7 @@ on:
 
 jobs:
   lint:
+    name: Run golangci-lint
     runs-on: ubuntu-latest
 
     steps:
@@ -21,6 +22,7 @@ jobs:
 
       - name: Run golangci-lint
         run: |
+          cd api
           ~/go/bin/golangci-lint run
 
   test:
@@ -65,10 +67,13 @@ jobs:
         EOF
 
     - name: Run tests
-      run: go test ./... -v -cover
+      run: |
+        cd api
+        go test ./... -v -cover
 
     - name: Generate test coverage report
       run: |
+        cd api
         go test ./... -coverprofile=coverage.out
         go tool cover -html=coverage.out -o coverage.html
 
@@ -77,3 +82,26 @@ jobs:
       with:
         name: coverage-report
         path: coverage.html 
+
+  client-lint:
+    name: Run eslint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          cd client
+          pnpm install
+
+      - name: Run lint
+        run: |
+          cd client
+          pnpm lint
