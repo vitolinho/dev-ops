@@ -120,7 +120,7 @@ onMounted(fetchCars);
   <!-- Modale de visualisation d'un véhicule -->
   <div v-if="showCarModal" class="modal">
     <div class="modal-content large">
-      <img v-if="selectedCar" src="../../assets/car1.jpg" class="modal-car-image" />
+      <img v-if="selectedCar" src="../../assets/car1.jpg" class="modal-car-image" alt="porsche car"/>
       <h2 v-if="selectedCar" style="text-transform: uppercase;">{{ selectedCar.name }}</h2>
       <p v-if="selectedCar" class="modal-price">{{ selectedCar.price.toLocaleString() }} €</p>
       <button class="close-modal" @click="closeCarModal">Retour</button>
@@ -133,8 +133,8 @@ onMounted(fetchCars);
       <h2>Confirmation</h2>
       <p>Êtes-vous sûr de vouloir supprimer cette voiture ?</p>
       <div class="modal-actions">
-        <button @click="deleteCar" class="confirm-button">Supprimer</button>
-        <button @click="closeDeleteModal" class="close">Annuler</button>
+        <button @click="deleteCar" class="suppr-button">Supprimer</button>
+        <button @click="closeDeleteModal" class="cancel-button">Annuler</button>
       </div>
     </div>
   </div>
@@ -145,7 +145,7 @@ onMounted(fetchCars);
 
     <ul v-if="!loading && !error" class="car-list">
       <li v-for="car in cars" :key="car.id" class="car-item">
-        <img src="../../assets/car1.jpg" class="car-image" />
+        <img src="../../assets/car1.jpg" class="car-image" alt="porsche car"/>
         <h3 class="car-name" style="text-transform: uppercase;">{{ car.name }}</h3>
         <p class="price">{{ car.price.toLocaleString() }} € </p>
         <div class="actions">
@@ -194,7 +194,7 @@ onMounted(fetchCars);
   cursor: pointer;
 }
 
-.confirm-button:hover {
+.suppr-button:hover {
   background-color: #9d0000;
 }
 
@@ -255,13 +255,12 @@ form button {
 }
 
 .close-modal:hover{
-  background-color: darkred;
 }
 
 /* Styles pour la liste des voitures */
 .container {
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
   font-family: Arial, sans-serif;
 }
 
