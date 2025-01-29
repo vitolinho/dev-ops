@@ -15,17 +15,25 @@ services:
   database:
     image: postgres:16
     ports:
-      - '127.0.0.1:5432:5432'
+      - '5432:5432'
     volumes:
       - psql-data:/var/lib/postgresql/data
+      - ./scripts/init-replica.sh:/docker-entrypoint-initdb.d/init-replica.sh
+      - ./config/postgresql.conf:/etc/postgresql/postgresql.conf
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      PG_REP_USER: ${PG_REP_USER}
+      PG_REP_PASSWORD: ${PG_REP_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 2s
       timeout: 1s
       retries: 10
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    deploy:
+      replicas: ${PRIMARY_REPLICA}
 
   db-test:
     image: postgres:16
@@ -35,10 +43,36 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=porsche_test
     ports:
-      - "5433:5432"  # Port différent pour la base de test
+      - "5433:5432"
     volumes:
       - postgres_test_data:/var/lib/postgresql/data
+
+  database-replica:
+    image: postgres:16
+    container_name: postgres_replica
+    ports:
+      - "5435:5432"
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      PG_REP_USER: ${PG_REP_USER}
+      PG_REP_PASSWORD: ${PG_REP_PASSWORD}
+    volumes:
+      - psql-replica-data:/var/lib/postgresql/data
+    command: |
+      bash -c '
+        rm -rf /var/lib/postgresql/data/* &&
+        PGPASSWORD=${PG_REP_PASSWORD} pg_basebackup -h ${PRIMARY_DB_URL} -D /var/lib/postgresql/data -U ${PG_REP_USER} -Fp -Xs -R -C -S replica_slot &&
+        exec docker-entrypoint.sh postgres -c hot_standby=on
+      '
+    deploy:
+      replicas: ${REPLICA_REPLICA}
 
 volumes:
   psql-data:
   postgres_test_data:
+  psql-replica-data:
