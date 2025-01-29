@@ -88,3 +88,11 @@ pnpm dev
 ```
 
 To access client development server go to http://localhost:3000
+
+Grafana request : 
+
+sum(api_requests_total{method="GET"})
+sum(api_requests_total{method="POST"})
+sum(api_requests_total{method="PUT"})
+sum(api_requests_total{method="DELETE"})
+sum(api_requests_total{path="/api/v1/cars"})
