@@ -133,8 +133,8 @@ onMounted(fetchCars);
       <h2>Confirmation</h2>
       <p>Êtes-vous sûr de vouloir supprimer cette voiture ?</p>
       <div class="modal-actions">
-        <button @click="deleteCar" class="confirm-button">Supprimer</button>
-        <button @click="closeDeleteModal" class="close">Annuler</button>
+        <button @click="deleteCar" class="suppr-button">Supprimer</button>
+        <button @click="closeDeleteModal" class="cancel-button">Annuler</button>
       </div>
     </div>
   </div>
@@ -194,7 +194,7 @@ onMounted(fetchCars);
   cursor: pointer;
 }
 
-.confirm-button:hover {
+.suppr-button:hover {
   background-color: #9d0000;
 }
 
@@ -255,7 +255,6 @@ form button {
 }
 
 .close-modal:hover{
-  background-color: darkred;
 }
 
 /* Styles pour la liste des voitures */
