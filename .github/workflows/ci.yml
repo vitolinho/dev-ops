@@ -63,7 +63,7 @@ jobs:
       run: |
         cd api
         cat > .env.test << EOF
-        DB_HOST=db-test
+        DB_HOST=porsche_db_test
         DB_USER=postgres
         DB_PASSWORD=postgres
         DB_NAME=porsche_test
