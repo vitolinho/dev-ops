@@ -2,14 +2,13 @@ package router
 
 import (
 	"porsche-api/internal/app/handler"
-	"porsche-api/internal/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func MakeRoutes(app *fiber.App) {
-	api := app.Group("/api", logger.New(), middleware.MetricsMiddleware())
+	api := app.Group("/api", logger.New())
 
 	v1 := api.Group("/v1")
 	v1.Post("/cars", handler.AddCar)
