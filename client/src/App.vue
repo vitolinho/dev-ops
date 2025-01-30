@@ -4,7 +4,7 @@ import DisplayCarsV2 from "./components/DisplayCars/DisplayCarsV2.vue";
 
 <template>
   <div>
-    <DisplayCarsV2></DisplayCarsV2>
+    <DisplayCarsV2 />
   </div>
 </template>
 
