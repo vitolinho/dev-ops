@@ -1,12 +1,11 @@
 #!/bin/bash
 
 # Variables
-DB_NAME="postgres"
-DB_USER="root"
-DB_HOST="localhost"
-DB_PORT="5432"
-DB_PASSWORD="password"
-BACKUP_DIR="backups"
+
+source ../.env
+
+
+BACKUP_DIR="../backups"
 LOG_FILE="$BACKUP_DIR/backup.log"
 DATE=$(date +"%Y-%m-%d_%H-%M-%S")
 BACKUP_FILE="$BACKUP_DIR/backup_$DATE.sql"
