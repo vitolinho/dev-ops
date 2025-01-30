@@ -13,6 +13,9 @@ const carToDelete = ref(null); // Stocke la voiture à supprimer
 const showCarModal = ref(false);
 const selectedCar = ref(null); // Stocke la voiture sélectionnée
 
+const showEditModal = ref(false); // Affichage de la modale de modification
+const carToEdit = ref(null); // Voiture en cours de modification
+const editedCar = ref({ name: "", price: null }); // Valeurs modifiées
 
 // Champs du formulaire
 const newCar = ref({
@@ -36,6 +39,70 @@ const fetchCars = async () => {
   }
 };
 
+const addCar = async () => {
+  try {
+    const response = await fetch("http://localhost:8000/api/v1/cars", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newCar.value.name, price: newCar.value.price })
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur lors de l'ajout de la voiture.");
+    }
+
+    //const addedCar = await response.json();
+
+    await fetchCars(); // Recharge toute la liste après ajout
+    closeModal();
+    newCar.value = { name: "", price: null };
+  } catch (err) {
+    error.value = err.message;
+  }
+};
+
+
+const deleteCar = async () => {
+  if (!carToDelete.value) return; // Vérifie qu'une voiture est bien sélectionnée
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/v1/cars/${carToDelete.value.id}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur lors de la suppression de la voiture.");
+    }
+
+    await fetchCars(); // Recharge toute la liste après ajout
+    closeDeleteModal(); // Ferme la modale après suppression
+
+  } catch (err) {
+    error.value = err.message;
+  }
+};
+
+const updateCar = async () => {
+  if (!carToEdit.value) return;
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/v1/cars/${carToEdit.value.id}`, {
+      method: "PUT", // Utilisation de la méthode PUT pour mettre à jour
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editedCar.value),
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur lors de la mise à jour de la voiture.");
+    }
+
+    await fetchCars(); // Recharge toute la liste après ajout
+
+    closeEditModal(); // Fermer la modale après la mise à jour
+  } catch (err) {
+    error.value = err.message;
+  }
+};
 // Fonction pour afficher la modale
 const openModal = () => {
   showModal.value = true;
@@ -44,21 +111,6 @@ const openModal = () => {
 // Fonction pour fermer la modale
 const closeModal = () => {
   showModal.value = false;
-};
-
-// Fonction pour ajouter une nouvelle voiture (ici on l'ajoute à la liste en local)
-const addCar = () => {
-  if (newCar.value.name && newCar.value.price) {
-    // Ajouter la voiture à la liste
-    cars.value.push({ ...newCar.value, id: cars.value.length + 1 });
-    // Réinitialiser le formulaire
-    newCar.value.name = "";
-    newCar.value.price = null;
-    // Fermer la modale
-    closeModal();
-  } else {
-    alert("Veuillez remplir tous les champs.");
-  }
 };
 
 // Fonction pour ouvrir la modale de confirmation de suppression
@@ -73,14 +125,6 @@ const closeDeleteModal = () => {
   carToDelete.value = null;
 };
 
-// Fonction pour supprimer une voiture
-const deleteCar = () => {
-  if (carToDelete.value) {
-    cars.value = cars.value.filter((car) => car.id !== carToDelete.value.id);
-    closeDeleteModal();
-  }
-};
-
 const openCarModal = (car) => {
   selectedCar.value = car;
   showCarModal.value = true;
@@ -92,6 +136,18 @@ const closeCarModal = () => {
   selectedCar.value = null;
 };
 
+const openEditModal = (car) => {
+  carToEdit.value = car; // Sauvegarde la voiture sélectionnée
+  editedCar.value = { ...car }; // Copie des données existantes
+  showEditModal.value = true; // Affiche la modale
+};
+
+const closeEditModal = () => {
+  showEditModal.value = false;
+  carToEdit.value = null;
+  editedCar.value = { name: "", price: null }; // Réinitialisation du formulaire
+};
+
 // Appel automatique au montage du composant
 onMounted(fetchCars);
 </script>
@@ -99,6 +155,8 @@ onMounted(fetchCars);
 <template>
   <h1>Porsche</h1>
     <button class="actions-button" @click="openModal">ADD CAR</button>
+
+  <!-- Modale d'ajout d'un véhicule -->
   <div v-if="showModal" class="modal">
     <div class="modal-content">
       <h2>Ajouter une voiture</h2>
@@ -139,6 +197,25 @@ onMounted(fetchCars);
     </div>
   </div>
 
+  <!-- Modale de confirmation de modification -->
+  <div v-if="showEditModal" class="modal">
+    <div class="modal-content">
+      <h2>Modifier la voiture</h2>
+      <form @submit.prevent="updateCar">
+        <div>
+          <label for="carName">Nom de la voiture:</label>
+          <input type="text" id="carName" v-model="editedCar.name" placeholder="Nom de la voiture" />
+        </div>
+        <div>
+          <label for="carPrice">Prix:</label>
+          <input type="number" id="carPrice" v-model="editedCar.price" placeholder="Prix de la voiture" />
+        </div>
+        <button type="submit">Enregistrer</button>
+        <button class="close" @click="closeEditModal()">Annuler</button>
+      </form>
+    </div>
+  </div>
+
   <div class="container">
     <div v-if="loading" class="loading">Chargement...</div>
     <div v-if="error" class="error">{{ error }}</div>
@@ -150,8 +227,12 @@ onMounted(fetchCars);
         <p class="price">{{ car.price.toLocaleString() }} € </p>
         <div class="actions">
           <button class="view-button" @click="openCarModal(car)" >Voir le véhicule</button>
+          <div class="actions2">
+          <button class="del-button" @click="openDeleteModal(car)">🗑️</button>
+          <button class="edit-button" @click="openEditModal(car)">✏️</button>
+          </div>
         </div>
-        <button class="del-button" @click="openDeleteModal(car)">🗑️</button>
+
       </li>
     </ul>
   </div>
@@ -245,7 +326,7 @@ form button {
 
 .close-modal {
   position: relative;
-  left: 240px;
+  left: 230px;
   background: #7c7c7c;
   color: white;
   padding: 5px 10px;
@@ -278,7 +359,7 @@ form button {
   background: #000000;
   border-radius: 20px;
   padding: 10px;
-  text-align: center;
+  text-align: left;
 }
 
 .car-image {
@@ -303,15 +384,17 @@ form button {
 }
 
 
-.del-button {
-  width: auto;
-  height: 10%;
-  margin: 15px;
+.actions2,button {
+  margin: 10px;
+
 }
 
 .del-button:hover {
   background-color: darkred;
 }
 
+.actions{
+  text-align: center;
+}
 
 </style>
