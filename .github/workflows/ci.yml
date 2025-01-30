@@ -39,12 +39,15 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: porsche_test
         ports:
-          - 5433:5433
+          - 5433:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        credentials:
+          username: postgres
+          password: postgres
 
     steps:
     - uses: actions/checkout@v3
@@ -63,7 +66,7 @@ jobs:
       run: |
         cd api
         cat > .env.test << EOF
-        DB_HOST=porsche_db_test
+        DB_HOST=localhost
         DB_USER=postgres
         DB_PASSWORD=postgres
         DB_NAME=porsche_test
@@ -74,19 +77,19 @@ jobs:
     - name: Run tests
       run: |
         cd api
-        go test ./... -v
+        go test ./... -v -cover
 
-    # - name: Generate test coverage report
-    #   run: |
-    #     cd api
-    #     go test ./... -coverprofile=coverage.out
-    #     go tool cover -html=coverage.out -o coverage.html
+    - name: Generate test coverage report
+      run: |
+        cd api
+        go test ./... -coverprofile=coverage.out
+        go tool cover -html=coverage.out -o coverage.html
 
-    # - name: Upload coverage report
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: coverage-report
-    #     path: api/coverage.html
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage.html 
 
   client-lint:
     name: Run eslint

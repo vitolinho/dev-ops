@@ -33,10 +33,9 @@ func Database() {
 		panic(fmt.Sprintf("warning: unable to create extension uuid-ossp: %v", err))
 	}
 
-
 	if err := DB.AutoMigrate(&model.Car{}); err != nil {
 		panic(fmt.Sprintf("failed to migrate database: %v", err))
 	}
-	
+
 	SeedCar()
 }
