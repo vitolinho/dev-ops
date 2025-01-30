@@ -31,6 +31,7 @@ services:
       interval: 2s
       timeout: 1s
       retries: 10
+    restart: always
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
     deploy:
       replicas: ${PRIMARY_REPLICA}
@@ -63,14 +64,30 @@ services:
       PG_REP_PASSWORD: ${PG_REP_PASSWORD}
     volumes:
       - psql-replica-data:/var/lib/postgresql/data
+    restart: on-failure:3
     command: |
       bash -c '
         rm -rf /var/lib/postgresql/data/* &&
-        PGPASSWORD=${PG_REP_PASSWORD} pg_basebackup -h ${PRIMARY_DB_URL} -D /var/lib/postgresql/data -U ${PG_REP_USER} -Fp -Xs -R -C -S replica_slot &&
+        if PGPASSWORD=${PG_REP_PASSWORD} psql -h ${PRIMARY_DB_URL} -U ${PG_REP_USER} -d ${DB_NAME} -t -c "SELECT 1 FROM pg_replication_slots WHERE slot_name = '"'"'replica_slot'"'"';" | grep -q 1; then
+          PGPASSWORD=${PG_REP_PASSWORD} pg_basebackup -h ${PRIMARY_DB_URL} -D /var/lib/postgresql/data -U ${PG_REP_USER} -Fp -Xs -R -S replica_slot
+        else
+          PGPASSWORD=${PG_REP_PASSWORD} pg_basebackup -h ${PRIMARY_DB_URL} -D /var/lib/postgresql/data -U ${PG_REP_USER} -Fp -Xs -R -C -S replica_slot
+        fi &&
         exec docker-entrypoint.sh postgres -c hot_standby=on
       '
     deploy:
       replicas: ${REPLICA_REPLICA}
+
+  haproxy:
+    image: haproxy:2.4
+    container_name: haproxy
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - database
+      - database-replica
 
 volumes:
   psql-data:
