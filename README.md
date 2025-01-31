@@ -39,6 +39,7 @@ Before you dive in, make sure to set up your environment variables by following 
 ### Linter
 First install the linter with this command
 ```bash
+cd api/scripts
 ./setup.sh
 ```
 
