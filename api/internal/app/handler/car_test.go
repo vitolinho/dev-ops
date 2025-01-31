@@ -23,7 +23,7 @@ func init() {
 
 	// Charger les variables d'environnement de test
 	if err := godotenv.Load(filepath.Join(projectRoot, ".env.test")); err != nil {
-		log.Fatal("Error loading .env.test file")
+		log.Printf("Warning: .env.test file not found: %v", err)
 	}
 
 	database.Database()
