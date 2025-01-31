@@ -88,4 +88,4 @@ pnpm install
 pnpm dev
 ```
 
-To access client development server go to http://localhost:3000
+To access client development server go to http://localhost:5173
