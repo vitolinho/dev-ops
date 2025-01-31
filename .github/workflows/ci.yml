@@ -67,7 +67,7 @@ jobs:
         DB_USER=postgres
         DB_PASSWORD=postgres
         DB_NAME=porsche_test
-        DB_PORT=5433
+        HA_PROXY_PORT=5433
         DB_TIMEZONE=Europe/Paris
         EOF
 
