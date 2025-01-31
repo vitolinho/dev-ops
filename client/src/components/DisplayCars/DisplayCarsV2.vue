@@ -25,7 +25,7 @@ const newCar = ref({
 
 const fetchCars = async () => {
     try {
-        const response = await fetch("http://localhost:8000/api/v1/cars");
+        const response = await fetch("http://63.176.96.156:8000/api/v1/cars");
 
         if (!response.ok) {
             throw new Error("Erreur lors de la récupération des voitures.");
@@ -41,7 +41,7 @@ const fetchCars = async () => {
 
 const addCar = async () => {
     try {
-        const response = await fetch("http://localhost:8000/api/v1/cars", {
+        const response = await fetch("http://63.176.96.156:8000/api/v1/cars", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: newCar.value.name, price: newCar.value.price })
@@ -66,7 +66,7 @@ const deleteCar = async () => {
     if (!carToDelete.value) return; // Vérifie qu'une voiture est bien sélectionnée
 
     try {
-        const response = await fetch(`http://localhost:8000/api/v1/cars/${carToDelete.value.id}`, {
+        const response = await fetch(`http://63.176.96.156:8000/api/v1/cars/${carToDelete.value.id}`, {
             method: "DELETE",
         });
 
@@ -86,7 +86,7 @@ const updateCar = async () => {
     if (!carToEdit.value) return;
 
     try {
-        const response = await fetch(`http://localhost:8000/api/v1/cars/${carToEdit.value.id}`, {
+        const response = await fetch(`http://63.176.96.156:8000/api/v1/cars/${carToEdit.value.id}`, {
             method: "PUT", // Utilisation de la méthode PUT pour mettre à jour
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(editedCar.value),
