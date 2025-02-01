@@ -36,6 +36,42 @@ Before you dive in, make sure to set up your environment variables by following 
 
 6. **Run the command**: In your terminal, simply execute `make up` or `docker-compose up -d --build` to start up your local environment.
 
+
+### Terraform
+
+To provision infrastructure using Terraform, follow these steps:
+
+1. **Configure your Terraform variables**:
+   Ensure that the required values are set in `terraform/terraform.tfvars`:
+   ```hcl
+   aws_access_key = "YOUR_AWS_ACCESS_KEY"
+   aws_secret_key = "YOUR_AWS_SECRET"
+   ssh_user = "YOUR_SSH_USER"
+
+2. **Configure your GitHub token**:  
+   Ensure that your personal access token is set in `terraform/ansible/vars.yml`:  
+   ```yaml
+   github_token: "YOUR_GITHUB_TOKEN"
+   ```  
+   You can generate a new GitHub token by visiting [GitHub Tokens](https://github.com/settings/tokens), clicking on **Generate new token (classic)**, giving it a name, and selecting the **admin:public_key** option.
+
+3. **Initialize Terraform**:  
+   `terraform init`
+
+4. **Plan your changes** (optional but recommended to preview changes):  
+   `terraform plan`
+
+5. **Apply changes to provision infrastructure**:  
+   `terraform apply -auto-approve`
+
+6. **Destroy infrastructure** (if needed):  
+   `terraform destroy -auto-approve`
+
+7. **SSH into a newly created server**:  
+   If you wish to connect to one of the created servers via SSH, automatically generated `make` commands are available. For example:  
+   `make ssh-dev-germany-instance`  
+   This command allows you to quickly access the server without manually specifying SSH parameters.
+
 ### Linter
 First install the linter with this command
 ```bash
