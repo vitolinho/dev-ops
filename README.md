@@ -72,6 +72,17 @@ To provision infrastructure using Terraform, follow these steps:
    `make ssh-dev-germany-instance`  
    This command allows you to quickly access the server without manually specifying SSH parameters.
 
+### Ansible
+Ansible is automatically triggered by Terraform during the infrastructure provisioning process. However, if modifications are made to the Ansible configuration, you can run it manually. Below is an example command to execute Ansible manually:
+
+```bash
+ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
+   -i ansible/inventory/prod-germany-instance \
+   -u {ssh_user} \
+   --private-key keys/prod-germany-instance-key.pem \
+   ansible/playbook.yml
+```
+
 ### Linter
 First install the linter with this command
 ```bash
